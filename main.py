@@ -1,6 +1,7 @@
 from fastapi import FastAPI, status, HTTPException
 from fastapi.encoders import jsonable_encoder
 from fastapi.responses import JSONResponse
+from fastapi_socketio import SocketManager
 
 from bson import ObjectId
 import dotenv
@@ -10,7 +11,7 @@ dotenv.load_dotenv()
 from database import *
 
 app = FastAPI()
-
+socket = SocketManager(app, cors_allowed_origins=["*"], mount_location="/ws")
 
 @app.get("/")
 async def root():
@@ -64,3 +65,7 @@ async def edit_product(id, product: Product):
 @app.delete("/product/{id}", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_product(id):
     await Products.delete_one({"_id": ObjectId(id)})
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8080)
